@@ -42,14 +42,16 @@ async def auth(
     password: Optional[str] = None,
     password_hash: Optional[str] = None,
 ):
-    hash = hashlib.sha512(password.encode("utf-8")).hexdigest()
     if (
-        hash != password_hash
-        or password is None
+        password is None
         or password_hash is None
         or password == ""
         or password_hash == ""
     ):
         response.status_code = 401
-    else:
+        return
+    hash = hashlib.sha512(password.encode("utf-8")).hexdigest()
+    if hash == password_hash:
         response.status_code = 204
+    else:
+        response.status_code = 401
