@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 import pytest
+from datetime import date, timedelta
 
 from main import app
 
@@ -72,3 +73,25 @@ def test_auth():
         "/auth?password=haslo&password_hash=f34ad4b3ae1e2cf33092e2abb60dc0444781c15d0e2e9ecdb37e4b14176a0164027b05900e09fa0f61a1882e0b89fbfa5dcfcc9765dd2ca4377e2c794837e091"
     )
     assert response.status_code == 401
+
+
+def test_register():
+    response = client.post("/register/", json={"name": "Jan", "surname": "Nowak"})
+    assert response.status_code == 201
+    assert response.json() == {
+        "id": 1,
+        "name": "Jan",
+        "surname": "Nowak",
+        "register_date": date.today().isoformat(),
+        "vaccination_date": (date.today() + timedelta(days=8)).isoformat(),
+    }
+
+    response = client.post("/register/", json={"name": "Adam", "surname": "Kowalski"})
+    assert response.status_code == 201
+    assert response.json() == {
+        "id": 2,
+        "name": "Adam",
+        "surname": "Kowalski",
+        "register_date": date.today().isoformat(),
+        "vaccination_date": (date.today() + timedelta(days=12)).isoformat(),
+    }
