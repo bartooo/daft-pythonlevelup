@@ -95,3 +95,15 @@ def test_register():
         "register_date": date.today().isoformat(),
         "vaccination_date": (date.today() + timedelta(days=12)).isoformat(),
     }
+
+    response = client.post(
+        "/register/", json={"name": "Marek11", "surname": "Witkowski200"}
+    )
+    assert response.status_code == 201
+    assert response.json() == {
+        "id": 3,
+        "name": "Marek11",
+        "surname": "Witkowski200",
+        "register_date": date.today().isoformat(),
+        "vaccination_date": (date.today() + timedelta(days=14)).isoformat(),
+    }

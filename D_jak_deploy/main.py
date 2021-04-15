@@ -17,8 +17,8 @@ class Patient(BaseModel):
     id: Optional[int] = None
     name: str
     surname: str
-    register_date: Optional[date] = None
-    vaccination_date: Optional[date] = None
+    register_date: Optional[str] = None
+    vaccination_date: Optional[str] = None
 
 
 @app.get("/")
@@ -72,9 +72,9 @@ async def register(response: Response, patient: Patient):
     app.patient_counter += 1
     patient.id = app.patient_counter
     patient.register_date = date.today().isoformat()
-    vaccination_date = date.today() + timedelta(
-        days=(len(patient.name) + len(patient.surname))
-    )
-    patient.vaccination_date = vaccination_date
+    letters_name = len([c for c in patient.name if c.isalpha()])
+    letters_surname = len([c for c in patient.surname if c.isalpha()])
+    vaccination_date = date.today() + timedelta(days=letters_name + letters_surname)
+    patient.vaccination_date = vaccination_date.isoformat()
     response.status_code = 201
     return patient.dict()
