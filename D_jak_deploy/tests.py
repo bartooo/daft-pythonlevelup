@@ -107,3 +107,41 @@ def test_register():
         "register_date": date.today().isoformat(),
         "vaccination_date": (date.today() + timedelta(days=14)).isoformat(),
     }
+
+
+def test_patient():
+    response = client.get("/patient/1")
+    assert response.status_code == 200
+    assert response.json() == {
+        "id": 1,
+        "name": "Jan",
+        "surname": "Nowak",
+        "register_date": date.today().isoformat(),
+        "vaccination_date": (date.today() + timedelta(days=8)).isoformat(),
+    }
+
+    response = client.get("/patient/2")
+    assert response.status_code == 200
+    assert response.json() == {
+        "id": 2,
+        "name": "Adam",
+        "surname": "Kowalski",
+        "register_date": date.today().isoformat(),
+        "vaccination_date": (date.today() + timedelta(days=12)).isoformat(),
+    }
+
+    response = client.get("/patient/3")
+    assert response.status_code == 200
+    assert response.json() == {
+        "id": 3,
+        "name": "Marek11",
+        "surname": "Witkowski200",
+        "register_date": date.today().isoformat(),
+        "vaccination_date": (date.today() + timedelta(days=14)).isoformat(),
+    }
+
+    response = client.get("/patient/4")
+    assert response.status_code == 404
+
+    response = client.get("/patient/0")
+    assert response.status_code == 400

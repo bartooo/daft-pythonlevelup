@@ -7,6 +7,7 @@ from datetime import date, timedelta
 app = FastAPI()
 app.counter = 0
 app.patient_counter = 0
+app.db = dict()
 
 
 class HelloResp(BaseModel):
@@ -76,8 +77,18 @@ async def register(response: Response, patient: Patient):
     letters_surname = len([c for c in patient.surname if c.isalpha()])
     vaccination_date = date.today() + timedelta(days=letters_name + letters_surname)
     patient.vaccination_date = vaccination_date.isoformat()
+    app.db[patient.id] = patient.dict()
     response.status_code = 201
     return patient.dict()
 
+
 @app.get("/patient/{id}")
-def 
+async def patient(response: Response, id: int):
+    if id in app.db.keys():
+        response.status_code = 200
+        return app.db[id]
+    else:
+        if id < 1:
+            response.status_code = 400
+        else:
+            response.status_code = 404
