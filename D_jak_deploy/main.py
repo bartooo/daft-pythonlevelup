@@ -78,3 +78,6 @@ async def register(response: Response, patient: Patient):
     patient.vaccination_date = vaccination_date.isoformat()
     response.status_code = 201
     return patient.dict()
+
+@app.get("/patient/{id}")
+def 
