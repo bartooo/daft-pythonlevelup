@@ -36,9 +36,9 @@ def method(request: Request, response: Response):
 
 
 @app.get("/auth/")
-def auth(response: Response, password: str, password_hash: str):
+def auth(response: Response, password: str = None, password_hash: str = None):
     hash = hashlib.sha512(password.encode("utf-8")).hexdigest()
-    if hash == password_hash:
-        response.status_code = 204
-    else:
+    if hash != password_hash or password is None or password_hash is None:
         response.status_code = 401
+    else:
+        response.status_code = 204
