@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request, Response
 from pydantic import BaseModel
+import hashlib
 
 app = FastAPI()
 app.counter = 0
@@ -32,3 +33,12 @@ def method(request: Request, response: Response):
     else:
         response.status_code = 200
     return {"method": request.method}
+
+
+@app.get("/auth/")
+def auth(response: Response, password: str, password_hash: str):
+    hash = hashlib.sha512(password.encode("utf-8")).hexdigest()
+    if hash == password_hash:
+        response.status_code = 204
+    else:
+        response.status_code = 401
