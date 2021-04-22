@@ -1,6 +1,6 @@
 import unittest
 
-from main import greetings, is_palindrome
+from main import greetings
 
 
 class ExampleTest(unittest.TestCase):
@@ -10,13 +10,6 @@ class ExampleTest(unittest.TestCase):
 
     def test_result(self):
         self.assertEqual(self.name_surname(), "Hello Joe Doe")
-
-    @is_palindrome
-    def show_sentence(self):
-        return "annA"
-
-    def test_result(self):
-        self.assertEqual(self.show_sentence(), "annA - is palindrome")
 
 
 if __name__ == "__main__":

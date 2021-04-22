@@ -14,3 +14,7 @@ def is_palindrome(sentence):
             return sentence(self) + " - is not palindrome"
 
     return check_if_palindrome
+
+
+def format_output():
+    pass
