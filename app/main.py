@@ -100,7 +100,9 @@ async def patient(response: Response, id: int):
 @app.get("/hello")
 def hello(request: Request):
     today = datetime.today()
+    month = today.month if today.month >= 10 else f"0{today.month}"
+    day = today.day if today.day >= 10 else f"0{today.day}"
     return templates.TemplateResponse(
         "hello.html.j2",
-        {"request": request, "YYYY": today.year, "MM": today.month, "DD": today.day},
+        {"request": request, "YYYY": today.year, "MM": month, "DD": day},
     )
