@@ -1,8 +1,10 @@
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Request, Response, Depends, HTTPException, status
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel
 import hashlib
+import secrets
 from typing import Optional
 from datetime import date, datetime, timedelta
 
@@ -10,7 +12,9 @@ app = FastAPI()
 app.counter = 0
 app.patient_counter = 0
 app.db = dict()
+app.access_tokens = []
 templates = Jinja2Templates(directory="templates")
+security = HTTPBasic()
 
 
 class HelloResp(BaseModel):
@@ -106,3 +110,35 @@ def hello(request: Request):
         "hello.html.j2",
         {"request": request, "YYYY": today.year, "MM": month, "DD": day},
     )
+
+
+@app.post("/login_session")
+def login_session(
+    response: Response, credentials: HTTPBasicCredentials = Depends(security)
+):
+    correct_username = secrets.compare_digest(credentials.username, "4dm1n")
+    correct_password = secrets.compare_digest(credentials.password, "NotSoSecurePa$$")
+    if not (correct_username and correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    session_token = hashlib.sha256(
+        f"{credentials.username}{credentials.password}".encode()
+    ).hexdigest()
+    app.access_tokens.append(session_token)
+    response.set_cookie(key="session_token", value=session_token)
+
+
+@app.post("/login_token")
+def login_token(credentials: HTTPBasicCredentials = Depends(security)):
+    correct_username = secrets.compare_digest(credentials.username, "4dm1n")
+    correct_password = secrets.compare_digest(credentials.password, "NotSoSecurePa$$")
+    if not (correct_username and correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return {"token": "value"}
