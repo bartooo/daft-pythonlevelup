@@ -1,13 +1,16 @@
 from fastapi import FastAPI, Request, Response
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 import hashlib
 from typing import Optional
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
 app = FastAPI()
 app.counter = 0
 app.patient_counter = 0
 app.db = dict()
+templates = Jinja2Templates(directory="templates")
 
 
 class HelloResp(BaseModel):
@@ -92,3 +95,12 @@ async def patient(response: Response, id: int):
             response.status_code = 400
         else:
             response.status_code = 404
+
+
+@app.get("/hello")
+def hello(request: Request):
+    today = datetime.today()
+    return templates.TemplateResponse(
+        "hello.html.j2",
+        {"request": request, "YYYY": today.year, "MM": today.month, "DD": today.day},
+    )
