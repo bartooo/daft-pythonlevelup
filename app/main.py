@@ -147,7 +147,6 @@ def login_session(
     session_token = generate_session_token(credentials.username, credentials.password)
     response.set_cookie(key="session_token", value=session_token)
     app.login_session = session_token
-    print(f"app.login_session={app.login_session}")
     response.status_code = 201
 
 
@@ -161,59 +160,55 @@ def login_token(
     session_token = generate_session_token(credentials.username, credentials.password)
     response.status_code = 201
     app.login_token = session_token
-    print(f"app.login_token={app.login_token}")
     return {"token": session_token}
 
 
-def generate_html_response():
-    html_content = """
-    <html>
-        <body>
-            <h1>Welcome!</h1>
-        </body>
-    </html>
-    """
-    return HTMLResponse(content=html_content, status_code=200)
+def generate_html_response(request: Request, h1: str):
+    return templates.TemplateResponse(
+        "mess.html.j2",
+        {"request": request, "h1": h1},
+    )
 
 
-def generate_json_response():
-    msg = {"message": "Welcome!"}
+def generate_json_response(msg: str):
+    msg = {"message": msg}
     return JSONResponse(content=msg, status_code=200)
 
 
-def generate_plain_response(text):
-    return PlainTextResponse(content=text, status_code=200)
+def generate_plain_response(msg: str):
+    return PlainTextResponse(content=msg, status_code=200)
 
 
 def check_session_token(session_token, is_session):
     if is_session:
         session = app.login_session
-        print(f"app.login_session={app.login_session}")
     else:
         session = app.login_token
-        print(f"app.login_token={app.login_token}")
     if session is None or session_token is None or session_token != session:
-        print("a")
         raise HTTPException(status_code=401, detail="Unathorised")
 
 
-def generate_response(format):
+def generate_response(format, request, msg):
     if format == "json":
-        return generate_json_response()
+        return generate_json_response(msg)
     elif format == "html":
-        return generate_html_response()
+        return generate_html_response(request, msg)
     else:
-        return generate_plain_response("Welcome!")
+        return generate_plain_response(msg)
 
 
 @app.get("/welcome_session")
-def welcome_session(session_token: str = Cookie(None), format: Optional[str] = None):
+def welcome_session(
+    request: Request, session_token: str = Cookie(None), format: Optional[str] = None
+):
 
     check_session_token(session_token, True)
-    return generate_response(format)
+    return generate_response(format, request)
 
 
 @app.get("/welcome_token")
-def welcome_session(token: Optional[str] = None, format: Optional[str] = None):
+def welcome_session(
+    request: Request, token: Optional[str] = None, format: Optional[str] = None
+):
     check_session_token(token, False)
-    return generate_response(format)
+    return generate_response(format, request)
