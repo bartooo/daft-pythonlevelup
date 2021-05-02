@@ -178,8 +178,11 @@ def generate_html_response():
 
 def generate_json_response():
     msg = {"message": "Welcome!"}
-    print("JSON")
     return JSONResponse(content=msg, status_code=200)
+
+
+def generate_plain_response(text):
+    return PlainTextResponse(content=text, status_code=200)
 
 
 def check_session_token(session_token, is_session):
@@ -200,7 +203,7 @@ def generate_response(format):
     elif format == "html":
         return generate_html_response()
     else:
-        return "Welcome!"
+        return generate_plain_response("Welcome!")
 
 
 @app.get("/welcome_session")
