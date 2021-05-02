@@ -129,10 +129,13 @@ def login_session(
     ).hexdigest()
     app.access_tokens.append(session_token)
     response.set_cookie(key="session_token", value=session_token)
+    response.status_code = 201
 
 
 @app.post("/login_token")
-def login_token(credentials: HTTPBasicCredentials = Depends(security)):
+def login_token(
+    response: Response, credentials: HTTPBasicCredentials = Depends(security)
+):
     correct_username = secrets.compare_digest(credentials.username, "4dm1n")
     correct_password = secrets.compare_digest(credentials.password, "NotSoSecurePa$$")
     if not (correct_username and correct_password):
@@ -141,4 +144,5 @@ def login_token(credentials: HTTPBasicCredentials = Depends(security)):
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Basic"},
         )
+    response.status_code = 201
     return {"token": "value"}
