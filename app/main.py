@@ -1,5 +1,6 @@
-from fastapi import FastAPI, Request, Response, Depends, HTTPException, status
-from fastapi.responses import HTMLResponse
+from _typeshed import SupportsReadline
+from fastapi import FastAPI, Request, Response, Depends, HTTPException, status, Cookie
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel
@@ -12,7 +13,8 @@ app = FastAPI()
 app.counter = 0
 app.patient_counter = 0
 app.db = dict()
-app.access_tokens = []
+app.login_session = None
+app.login_token = None
 templates = Jinja2Templates(directory="templates")
 security = HTTPBasic()
 
@@ -112,23 +114,40 @@ def hello(request: Request):
     )
 
 
-@app.post("/login_session")
-def login_session(
-    response: Response, credentials: HTTPBasicCredentials = Depends(security)
-):
-    correct_username = secrets.compare_digest(credentials.username, "4dm1n")
-    correct_password = secrets.compare_digest(credentials.password, "NotSoSecurePa$$")
-    if not (correct_username and correct_password):
+def compare_username(given, correct):
+    correct_username = secrets.compare_digest(given, correct)
+    return correct_username
+
+
+def compare_passwd(given, correct):
+    correct_password = secrets.compare_digest(given, correct)
+    return correct_password
+
+
+def check_passes(username, passwd):
+    if not (username and passwd):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Basic"},
         )
-    session_token = hashlib.sha256(
-        f"{credentials.username}{credentials.password}".encode()
-    ).hexdigest()
-    app.access_tokens.append(session_token)
+
+
+def generate_session_token(username, passwd):
+    session_token = hashlib.sha256(f"{username}{passwd}".encode()).hexdigest()
+    return session_token
+
+
+@app.post("/login_session")
+def login_session(
+    response: Response, credentials: HTTPBasicCredentials = Depends(security)
+):
+    correct_username = compare_username(credentials.username, "4dm1n")
+    correct_password = compare_passwd(credentials.password, "NotSoSecurePa$$")
+    check_passes(correct_username, correct_password)
+    session_token = generate_session_token(credentials.username, credentials.password)
     response.set_cookie(key="session_token", value=session_token)
+    app.login_session = session_token
     response.status_code = 201
 
 
@@ -136,13 +155,57 @@ def login_session(
 def login_token(
     response: Response, credentials: HTTPBasicCredentials = Depends(security)
 ):
-    correct_username = secrets.compare_digest(credentials.username, "4dm1n")
-    correct_password = secrets.compare_digest(credentials.password, "NotSoSecurePa$$")
-    if not (correct_username and correct_password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Basic"},
-        )
+    correct_username = compare_username(credentials.username, "4dm1n")
+    correct_password = compare_passwd(credentials.password, "NotSoSecurePa$$")
+    check_passes(correct_username, correct_password)
+    session_token = generate_session_token(credentials.username, credentials.password)
     response.status_code = 201
-    return {"token": "value"}
+    app.login_token = session_token
+    return {"token": session_token}
+
+
+def generate_html_response():
+    html_content = """
+    <html>
+        <body>
+            <h1>Welcome!</h1>
+        </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content, status_code=200)
+
+
+def generate_json_response():
+    msg = {"message": "Welcome!"}
+    return JSONResponse(content=msg, status_code=200)
+
+
+def check_session_token(session_token):
+    if (
+        app.login_session is None
+        or session_token is None
+        or session_token != app.login_session
+    ):
+        raise HTTPException(status_code=401, detail="Unathorised")
+
+
+def generate_response(format):
+    if format == "json":
+        return generate_json_response()
+    elif format == "html":
+        return generate_html_response()
+    else:
+        return "Welcome!"
+
+
+@app.get("/welcome_session")
+def welcome_session(session_token: str = Cookie(None), format: Optional[str] = None):
+
+    check_session_token(session_token)
+    generate_response(format)
+
+
+@app.get("/welcome_token")
+def welcome_session(token: Optional[str] = None, format: Optional[str] = None):
+    check_session_token(token)
+    generate_response(format)
