@@ -1,5 +1,10 @@
 from fastapi import FastAPI, Request, Response, Depends, HTTPException, status, Cookie
-from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
+from fastapi.responses import (
+    HTMLResponse,
+    JSONResponse,
+    PlainTextResponse,
+    RedirectResponse,
+)
 from fastapi.templating import Jinja2Templates
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel
@@ -197,6 +202,13 @@ def generate_response(format, request, msg):
         return generate_plain_response(msg)
 
 
+def clear_session_token(is_session):
+    if is_session:
+        app.login_session = None
+    else:
+        app.login_token = None
+
+
 @app.get("/welcome_session")
 def welcome_session(
     request: Request, session_token: str = Cookie(None), format: Optional[str] = None
@@ -212,3 +224,26 @@ def welcome_session(
 ):
     check_session_token(token, False)
     return generate_response(format, request)
+
+
+@app.delete("/logout_session")
+def logout_session(
+    request: Request, session_token: str = Cookie(None), format: Optional[str] = None
+):
+    check_session_token(session_token, True)
+    clear_session_token(True)
+    return RedirectResponse("/logged_out", status_code=302)
+
+
+@app.delete("/logout_token")
+def logout_token(
+    request: Request, token: Optional[str] = None, format: Optional[str] = None
+):
+    check_session_token(token, False)
+    clear_session_token(False)
+    return RedirectResponse("/logged_out", status_code=302)
+
+
+@app.get("/logged_out")
+def logged_out(request: Request, format: Optional[str] = None):
+    return generate_response(format, request, "Logged out!")
