@@ -1,4 +1,3 @@
-from _typeshed import SupportsReadline
 from fastapi import FastAPI, Request, Response, Depends, HTTPException, status, Cookie
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
 from fastapi.templating import Jinja2Templates
