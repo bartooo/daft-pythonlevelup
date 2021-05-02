@@ -219,7 +219,7 @@ def welcome_session(
 
 
 @app.get("/welcome_token")
-def welcome_session(
+def welcome_token(
     request: Request, token: Optional[str] = None, format: Optional[str] = None
 ):
     check_session_token(token, False)
