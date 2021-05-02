@@ -147,6 +147,7 @@ def login_session(
     session_token = generate_session_token(credentials.username, credentials.password)
     response.set_cookie(key="session_token", value=session_token)
     app.login_session = session_token
+    print(f"app.login_session={app.login_session}")
     response.status_code = 201
 
 
@@ -160,6 +161,7 @@ def login_token(
     session_token = generate_session_token(credentials.username, credentials.password)
     response.status_code = 201
     app.login_token = session_token
+    print(f"app.login_token={app.login_token}")
     return {"token": session_token}
 
 
@@ -176,15 +178,19 @@ def generate_html_response():
 
 def generate_json_response():
     msg = {"message": "Welcome!"}
+    print("JSON")
     return JSONResponse(content=msg, status_code=200)
 
 
 def check_session_token(session_token, is_session):
     if is_session:
         session = app.login_session
+        print(f"app.login_session={app.login_session}")
     else:
         session = app.login_token
+        print(f"app.login_token={app.login_token}")
     if session is None or session_token is None or session_token != session:
+        print("a")
         raise HTTPException(status_code=401, detail="Unathorised")
 
 
@@ -201,10 +207,10 @@ def generate_response(format):
 def welcome_session(session_token: str = Cookie(None), format: Optional[str] = None):
 
     check_session_token(session_token, True)
-    generate_response(format)
+    return generate_response(format)
 
 
 @app.get("/welcome_token")
 def welcome_session(token: Optional[str] = None, format: Optional[str] = None):
     check_session_token(token, False)
-    generate_response(format)
+    return generate_response(format)
