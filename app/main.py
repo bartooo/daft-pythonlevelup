@@ -180,12 +180,12 @@ def generate_json_response():
     return JSONResponse(content=msg, status_code=200)
 
 
-def check_session_token(session_token):
-    if (
-        app.login_session is None
-        or session_token is None
-        or session_token != app.login_session
-    ):
+def check_session_token(session_token, is_session):
+    if is_session:
+        session = app.login_session
+    else:
+        session = app.login_token
+    if session is None or session_token is None or session_token != session:
         raise HTTPException(status_code=401, detail="Unathorised")
 
 
@@ -201,11 +201,11 @@ def generate_response(format):
 @app.get("/welcome_session")
 def welcome_session(session_token: str = Cookie(None), format: Optional[str] = None):
 
-    check_session_token(session_token)
+    check_session_token(session_token, True)
     generate_response(format)
 
 
 @app.get("/welcome_token")
 def welcome_session(token: Optional[str] = None, format: Optional[str] = None):
-    check_session_token(token)
+    check_session_token(token, False)
     generate_response(format)
