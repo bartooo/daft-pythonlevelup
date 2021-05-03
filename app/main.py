@@ -226,7 +226,7 @@ def welcome_token(
     request: Request, token: Optional[str] = None, format: Optional[str] = None
 ):
     check_session_token(token, False)
-    return generate_response(format, request)
+    return generate_response(format, request, "Welcome!")
 
 
 @app.delete("/logout_session")
