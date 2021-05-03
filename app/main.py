@@ -140,7 +140,7 @@ def check_passes(username, passwd):
 
 def generate_session(username, passwd):
     session_token = hashlib.sha256(
-        f"{username}{passwd}{app.secret_key}".encode()
+        f"{username}{passwd}{app.secret_key}{app.counter}".encode()
     ).hexdigest()
     return session_token
 
@@ -169,6 +169,7 @@ def login_session(
     correct_username = compare_username(credentials.username, "4dm1n")
     correct_password = compare_passwd(credentials.password, "NotSoSecurePa$$")
     check_passes(correct_username, correct_password)
+    app.counter += 1
     session_token = generate_session(credentials.username, credentials.password)
     response.set_cookie(key="session_token", value=session_token)
     store_session(session_token, True)
@@ -182,6 +183,7 @@ def login_token(
     correct_username = compare_username(credentials.username, "4dm1n")
     correct_password = compare_passwd(credentials.password, "NotSoSecurePa$$")
     check_passes(correct_username, correct_password)
+    app.counter += 1
     session_token = generate_session(credentials.username, credentials.password)
     response.status_code = 201
     store_session(session_token, False)
