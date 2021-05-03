@@ -235,7 +235,9 @@ def logout_session(
 ):
     check_session_token(session_token, True)
     clear_session_token(True)
-    return RedirectResponse("/logged_out", status_code=303)
+    return RedirectResponse(
+        url=f"/logged_out?format={format}", status_code=status.HTTP_303_SEE_OTHER
+    )
 
 
 @app.delete("/logout_token")
@@ -244,7 +246,9 @@ def logout_token(
 ):
     check_session_token(token, False)
     clear_session_token(False)
-    return RedirectResponse(url="/logged_out", status_code=303)
+    return RedirectResponse(
+        url=f"/logged_out?format={format}", status_code=status.HTTP_303_SEE_OTHER
+    )
 
 
 @app.get("/logged_out")
