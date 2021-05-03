@@ -152,6 +152,7 @@ def login_session(
     session_token = generate_session_token(credentials.username, credentials.password)
     response.set_cookie(key="session_token", value=session_token)
     app.login_session = session_token
+    print(f"app.login_session={app.login_session}")
     response.status_code = 201
 
 
@@ -189,6 +190,8 @@ def check_session_token(session_token, is_session):
         session = app.login_session
     else:
         session = app.login_token
+    print(f"app.login_session={app.login_session}")
+
     if session is None or session_token is None or session_token != session:
         raise HTTPException(status_code=401, detail="Unathorised")
 
@@ -215,7 +218,7 @@ def welcome_session(
 ):
 
     check_session_token(session_token, True)
-    return generate_response(format, request)
+    return generate_response(format, request, "Welcome!")
 
 
 @app.get("/welcome_token")
