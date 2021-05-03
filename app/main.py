@@ -145,11 +145,16 @@ def generate_session(username, passwd):
     return session_token
 
 
-def store_session(session, is_cookie):
+def select_container(is_cookie):
     if is_cookie:
         container = app.session_cookie
     else:
         container = app.session_token
+    return container
+
+
+def store_session(session, is_cookie):
+    container = select_container(is_cookie)
 
     if len(container) >= 3:
         del container[0]
@@ -201,11 +206,11 @@ def generate_plain_response(msg: str):
 
 def check_session_token(session_token, is_cookie):
     if is_cookie:
-        session = app.session_cookie
+        container = app.session_cookie
     else:
-        session = app.session_token
+        container = app.session_token
 
-    if session is None or session_token is None or session_token != session:
+    if len(container) == 0 or session_token is None or session_token not in container:
         raise HTTPException(status_code=401, detail="Unathorised")
 
 
@@ -218,11 +223,10 @@ def generate_response(format, request, msg):
         return generate_plain_response(msg)
 
 
-def clear_session_token(is_cookie):
-    if is_cookie:
-        app.session_cookie = None
-    else:
-        app.session_token = None
+def del_session_token(session_token, is_cookie):
+    container = select_container(is_cookie)
+    index = container.index(session_token)
+    del container[index]
 
 
 @app.get("/welcome_session")
@@ -247,7 +251,7 @@ def logout_session(
     request: Request, session_token: str = Cookie(None), format: Optional[str] = None
 ):
     check_session_token(session_token, True)
-    clear_session_token(True)
+    del_session_token(session_token, True)
     return RedirectResponse(
         url=f"/logged_out?format={format}", status_code=status.HTTP_303_SEE_OTHER
     )
@@ -258,7 +262,7 @@ def logout_token(
     request: Request, token: Optional[str] = None, format: Optional[str] = None
 ):
     check_session_token(token, False)
-    clear_session_token(False)
+    del_session_token(token, False)
     return RedirectResponse(
         url=f"/logged_out?format={format}", status_code=status.HTTP_303_SEE_OTHER
     )
