@@ -17,8 +17,9 @@ app = FastAPI()
 app.counter = 0
 app.patient_counter = 0
 app.db = dict()
-app.login_session = None
-app.login_token = None
+app.secret_key = "very secret key"
+app.session_cookie = []
+app.session_token = []
 templates = Jinja2Templates(directory="templates")
 security = HTTPBasic()
 
@@ -137,9 +138,23 @@ def check_passes(username, passwd):
         )
 
 
-def generate_session_token(username, passwd):
-    session_token = hashlib.sha256(f"{username}{passwd}".encode()).hexdigest()
+def generate_session(username, passwd):
+    session_token = hashlib.sha256(
+        f"{username}{passwd}{app.secret_key}".encode()
+    ).hexdigest()
     return session_token
+
+
+def store_session(session, is_cookie):
+    if is_cookie:
+        container = app.session_cookie
+    else:
+        container = app.session_token
+
+    if len(container) >= 3:
+        del container[0]
+
+    container.append(session)
 
 
 @app.post("/login_session")
@@ -149,10 +164,9 @@ def login_session(
     correct_username = compare_username(credentials.username, "4dm1n")
     correct_password = compare_passwd(credentials.password, "NotSoSecurePa$$")
     check_passes(correct_username, correct_password)
-    session_token = generate_session_token(credentials.username, credentials.password)
+    session_token = generate_session(credentials.username, credentials.password)
     response.set_cookie(key="session_token", value=session_token)
-    app.login_session = session_token
-    print(f"app.login_session={app.login_session}")
+    store_session(session_token, True)
     response.status_code = 201
 
 
@@ -163,9 +177,9 @@ def login_token(
     correct_username = compare_username(credentials.username, "4dm1n")
     correct_password = compare_passwd(credentials.password, "NotSoSecurePa$$")
     check_passes(correct_username, correct_password)
-    session_token = generate_session_token(credentials.username, credentials.password)
+    session_token = generate_session(credentials.username, credentials.password)
     response.status_code = 201
-    app.login_token = session_token
+    store_session(session_token, False)
     return {"token": session_token}
 
 
@@ -185,12 +199,11 @@ def generate_plain_response(msg: str):
     return PlainTextResponse(content=msg, status_code=200)
 
 
-def check_session_token(session_token, is_session):
-    if is_session:
-        session = app.login_session
+def check_session_token(session_token, is_cookie):
+    if is_cookie:
+        session = app.session_cookie
     else:
-        session = app.login_token
-    print(f"app.login_session={app.login_session}")
+        session = app.session_token
 
     if session is None or session_token is None or session_token != session:
         raise HTTPException(status_code=401, detail="Unathorised")
@@ -205,11 +218,11 @@ def generate_response(format, request, msg):
         return generate_plain_response(msg)
 
 
-def clear_session_token(is_session):
-    if is_session:
-        app.login_session = None
+def clear_session_token(is_cookie):
+    if is_cookie:
+        app.session_cookie = None
     else:
-        app.login_token = None
+        app.session_token = None
 
 
 @app.get("/welcome_session")
