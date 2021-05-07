@@ -4,8 +4,13 @@ from typing import Optional
 from fastapi.exceptions import HTTPException
 from fastapi.params import Query
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 
 router = APIRouter()
+
+
+class Category(BaseModel):
+    name: str
 
 
 @router.on_event("startup")
@@ -158,3 +163,59 @@ async def get_orders_by_product_id(response: Response, id: int):
             for x in data
         ]
     }
+
+
+@router.post("/categories")
+async def create_category(response: Response, category: Category):
+    response.status_code = status.HTTP_201_CREATED
+    cursor = router.db_connection.execute(
+        "INSERT INTO Categories (CategoryName) VALUES {?}", (category.name)
+    )
+    router.db_connection.commit()
+    new_category_id = cursor.lastrowid
+    router.db_connection.row_factory = sqlite3.Row
+    return {"id": new_category_id, "name": category.name}
+
+
+def check_if_category_exists(id: int):
+    router.db_connection.row_factory = sqlite3.Row
+    data = router.db_connection.execute(
+        "SELECT CategoryID FROM Categories WHERE CategoryID = :category_id",
+        {"category_id": id},
+    ).fetchone()
+    return False if data is None else True
+
+
+@router.put("/categories/{id}")
+async def update_category_by_id(response: Response, id: int, category: Category):
+    response.status_code = status.HTTP_200_OK
+    if not check_if_category_exists(id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Record with given id not found",
+        )
+    cursor = router.db_connection.execute(
+        "UPDATE Categories SET CategoryName = :category_name WHERE CategoryID = :category_id",
+        {"category_name": category.name, "category_id": id},
+    )
+    router.db_connection.commit()
+    data = router.db_connection.execute(
+        "SELECT CategoryID, CategoryName FROM Categories WHERE CategoryID = :category_id",
+        {"category_id": id},
+    ).fetchone()
+    return {"id": data["CategoryID"], "name": data["CategoryName"]}
+
+
+@router.delete("/categories/{id}")
+async def delete_category_by_id(response: Response, id: int):
+    response.status_code = status.HTTP_200_OK
+    if not check_if_category_exists(id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Record with given id not found",
+        )
+    cursor = router.db_connection.execute(
+        "DELETE FROM Categories WHERE CategoryID = :category_id", {"category_id": id}
+    )
+    router.db_connection.commit()
+    return {"deleted": cursor.rowcount}
