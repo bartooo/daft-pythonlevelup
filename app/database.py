@@ -203,7 +203,7 @@ async def update_category_by_id(response: Response, id: int, category: Category)
         "SELECT CategoryID, CategoryName FROM Categories WHERE CategoryID = :category_id",
         {"category_id": id},
     ).fetchone()
-    return {"id": data["CategoryID"], "name": data["CategoryName"]}
+    return {"id": id, "name": category.name}
 
 
 @router.delete("/categories/{id}")
