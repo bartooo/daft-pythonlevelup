@@ -144,7 +144,7 @@ async def get_orders_by_product_id(response: Response, id: int):
             detail="Record with given id not found",
         )
     data = router.db_connection.execute(
-        "SELECT Products.ProductID, Orders.OrderID, Customers.CompanyName, 'Order Details'.Quantity, ROUND(('Order Details'.UnitPrice * 'Order Details'.Quantity) - ('Order Details'.Discount * ('Order Details'.UnitPrice * 'Order Details'.Quantity)), 2) AS TotalPrice FROM Products JOIN 'Order Details' ON Products.ProductID = 'Order Details'.ProductID JOIN Orders ON 'Order Details'.OrderID = Orders.OrderID JOIN Customers ON Orders.CustomerID = Customers.CustomerID WHERE ProductID = :product_id",
+        "SELECT Products.ProductID, Orders.OrderID, Customers.CompanyName, 'Order Details'.Quantity, ROUND(('Order Details'.UnitPrice * 'Order Details'.Quantity) - ('Order Details'.Discount * ('Order Details'.UnitPrice * 'Order Details'.Quantity)), 2) AS TotalPrice FROM Products JOIN 'Order Details' ON Products.ProductID = 'Order Details'.ProductID JOIN Orders ON 'Order Details'.OrderID = Orders.OrderID JOIN Customers ON Orders.CustomerID = Customers.CustomerID WHERE Products.ProductID = :product_id",
         {"product_id": id},
     ).fetchall()
     return {
