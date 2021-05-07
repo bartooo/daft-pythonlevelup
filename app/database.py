@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Response, status
 import sqlite3
 
+from fastapi.exceptions import HTTPException
+
 router = APIRouter()
 
 
@@ -46,3 +48,19 @@ async def get_categories(response: Response):
             for x in data
         ]
     }
+
+
+@router.get("/products/{id}")
+def get_product_by_id(response: Response):
+    router.db_connection.row_factory = sqlite3.Row
+    data = router.db_connection.execute(
+        "SELECT ProductName FROM Products WHERE ProductID = :product_id",
+        {"product_id": id},
+    ).fetchone()
+    if data is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Record with given id not found",
+        )
+    response.status_code = status.HTTP_200_OK
+    return {"id": id, "name": data["ProductName"]}
