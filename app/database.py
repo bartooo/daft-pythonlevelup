@@ -41,7 +41,9 @@ def get_categories(response: Response):
             {
                 "id": x["CustomerID"],
                 "name": x["CompanyName"],
-                "full_address": f'{x["Address"]} {x["PostalCode"]} {x["City"]} {x["Country"]}',
+                "full_address": f'{x["Address"]} {x["PostalCode"]} {x["City"]} {x["Country"]}'
+                if x["Address"] and x["PostalCode"] and x["City"] and x["Country"]
+                else None,
             }
             for x in data
         ]
