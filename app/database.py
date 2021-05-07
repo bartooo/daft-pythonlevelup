@@ -2,6 +2,7 @@ from fastapi import APIRouter, Response, status
 import sqlite3
 
 from fastapi.exceptions import HTTPException
+from fastapi.responses import JSONResponse
 
 router = APIRouter()
 
@@ -50,8 +51,8 @@ async def get_categories(response: Response):
     }
 
 
-@router.get("/products/{id}")
-def get_product_by_id(response: Response):
+@router.get("/products/{id}", response_class=JSONResponse)
+async def get_product_by_id(response: Response, id: int):
     router.db_connection.row_factory = sqlite3.Row
     data = router.db_connection.execute(
         "SELECT ProductName FROM Products WHERE ProductID = :product_id",
