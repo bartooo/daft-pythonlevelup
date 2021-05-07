@@ -92,7 +92,6 @@ async def get_employees(
         query += f" LIMIT {limit}"
     if offset:
         query += f" OFFSET {offset}"
-    print(query)
     data = router.db_connection.execute(query).fetchall()
     return {
         "employees": [
@@ -101,6 +100,26 @@ async def get_employees(
                 "last_name": x["LastName"],
                 "first_name": x["FirstName"],
                 "city": x["City"],
+            }
+            for x in data
+        ]
+    }
+
+
+@router.get("/products_extended")
+async def products_extended(response: Response):
+    response.status_code = status.HTTP_200_OK
+    router.db_connection.row_factory = sqlite3.Row
+    data = router.db_connection.execute(
+        "SELECT ProductID, ProductName, CategoryName, CompanyName FROM Products JOIN Categories ON Products.CategoryID = Categories.CategoryID JOIN Suppliers ON Products.SupplierID = Suppliers.SupplierID"
+    )
+    return {
+        "products_extended": [
+            {
+                "id": x["ProductID"],
+                "name": x["ProductName"],
+                "category": x["CategoryName"],
+                "supplier": x["CompanyName"],
             }
             for x in data
         ]
