@@ -12,6 +12,7 @@ import hashlib
 import secrets
 from typing import Optional
 from datetime import date, datetime, timedelta
+import database
 
 app = FastAPI()
 app.counter = 0
@@ -22,6 +23,8 @@ app.session_cookie = []
 app.session_token = []
 templates = Jinja2Templates(directory="templates")
 security = HTTPBasic()
+
+app.include_router(database.router)
 
 
 class HelloResp(BaseModel):
