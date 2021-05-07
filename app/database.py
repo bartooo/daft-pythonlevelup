@@ -124,3 +124,36 @@ async def products_extended(response: Response):
             for x in data
         ]
     }
+
+
+def check_if_product_exists(id: int):
+    router.db_connection.row_factory = sqlite3.Row
+    data = router.db_connection.execute(
+        "SELECT ProductID FROM Products WHERE ProductID = :product_id",
+        {"product_id": id},
+    ).fetchone()
+    return False if data is None else True
+
+
+@router.get("/products/{id}/orders")
+async def get_orders_by_product_id(response: Response, id: int):
+    response.status_code = status.HTTP_200_OK
+    if not check_if_product_exists(id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Record with given id not found",
+        )
+    data = router.db_connection.execute(
+        "SELECT Products.ProductID, Orders.OrderID, Customers.CompanyName, 'Order Details'.Quantity, ('Order Details'.UnitPrice * 'Order Details'.Quantity) - ('Order Details'.Discount * ('Order Details'.UnitPrice * 'Order Details'.Quantity)) AS TotalPrice FROM Products JOIN 'Order Details' ON Products.ProductID = 'Order Details'.ProductID JOIN Orders ON 'Order Details'.OrderID = Orders.OrderID JOIN Customers ON Orders.CustomerID = Customers.CustomerID"
+    ).fetchall()
+    return {
+        "orders": [
+            {
+                "id": x["OrderID"],
+                "customer": x["CompanyName"],
+                "quantity": x["Quantity"],
+                "total_price": x["TotalPrice"],
+            }
+            for x in data
+        ]
+    }
