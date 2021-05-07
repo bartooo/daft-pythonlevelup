@@ -169,7 +169,7 @@ async def get_orders_by_product_id(response: Response, id: int):
 async def create_category(response: Response, category: Category):
     response.status_code = status.HTTP_201_CREATED
     cursor = router.db_connection.execute(
-        "INSERT INTO Categories (CategoryName) VALUES {?}", (category.name)
+        f"INSERT INTO Categories (CategoryName) VALUES ('{category.name}')",
     )
     router.db_connection.commit()
     new_category_id = cursor.lastrowid
