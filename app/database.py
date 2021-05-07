@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Response, status
 import sqlite3
-
+from typing import Optional
 from fastapi.exceptions import HTTPException
+from fastapi.params import Query
 from fastapi.responses import JSONResponse
 
 router = APIRouter()
@@ -65,3 +66,42 @@ async def get_product_by_id(response: Response, id: int):
         )
     response.status_code = status.HTTP_200_OK
     return {"id": id, "name": data["ProductName"]}
+
+
+def check_order(order):
+    if order not in {"first_name", "last_name", "city", "EmployeeID"}:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Wrong order parameter",
+        )
+
+
+@router.get("/employees", response_class=JSONResponse)
+async def get_employees(
+    response: Response,
+    limit: Optional[int] = Query(None),
+    offset: Optional[int] = Query(None),
+    order: Optional[str] = Query("EmployeeID"),
+):
+    response.status_code = status.HTTP_200_OK
+    check_order(order)
+    order = "".join([word.capitalize() for word in order.split("_")])
+    router.db_connection.row_factory = sqlite3.Row
+    query = f"SELECT EmployeeID, LastName, FirstName, City FROM Employees ORDER BY {order} ASC"
+    if limit:
+        query += f" LIMIT {limit}"
+    if offset:
+        query += f" OFFSET {offset}"
+    print(query)
+    data = router.db_connection.execute(query).fetchall()
+    return {
+        "employees": [
+            {
+                "id": x["EmployeeID"],
+                "last_name": x["LastName"],
+                "first_name": x["FirstName"],
+                "city": x["City"],
+            }
+            for x in data
+        ]
+    }
