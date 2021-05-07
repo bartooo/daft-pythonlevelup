@@ -18,7 +18,7 @@ async def shutdown():
 
 
 @router.get("/categories")
-def get_categories(response: Response):
+async def get_categories(response: Response):
     response.status_code = status.HTTP_200_OK
     router.db_connection.row_factory = sqlite3.Row
     data = router.db_connection.execute(
@@ -30,20 +30,18 @@ def get_categories(response: Response):
 
 
 @router.get("/customers")
-def get_categories(response: Response):
+async def get_categories(response: Response):
     response.status_code = status.HTTP_200_OK
     router.db_connection.row_factory = sqlite3.Row
     data = router.db_connection.execute(
-        "SELECT CustomerID, CompanyName, Address, PostalCode, City, Country FROM Customers ORDER BY CustomerID"
+        "SELECT CustomerID, CompanyName, Address, PostalCode, City, Country FROM Customers"
     ).fetchall()
     return {
         "customers": [
             {
                 "id": x["CustomerID"],
                 "name": x["CompanyName"],
-                "full_address": f'{x["Address"]} {x["PostalCode"]} {x["City"]} {x["Country"]}'
-                if x["Address"] and x["PostalCode"] and x["City"] and x["Country"]
-                else None,
+                "full_address": f'{x["Address"]} {x["PostalCode"]} {x["City"]} {x["Country"]}',
             }
             for x in data
         ]
