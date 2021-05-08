@@ -43,14 +43,14 @@ async def get_categories(response: Response):
     response.status_code = status.HTTP_200_OK
     router.db_connection.row_factory = sqlite3.Row
     data = router.db_connection.execute(
-        "SELECT CustomerID, CompanyName, Address, PostalCode, City, Country FROM Customers ORDER BY LOWER(CustomerID)"
+        "SELECT CustomerID, CompanyName, Address|| ' ' || PostalCode || ' ' || City || ' ' || Country AS FullAddress FROM Customers ORDER BY LOWER(CustomerID)"
     ).fetchall()
     return {
         "customers": [
             {
                 "id": x["CustomerID"],
                 "name": x["CompanyName"],
-                "full_address": f'{x["Address"]} {x["PostalCode"]} {x["City"]} {x["Country"]}',
+                "full_address": x["FullAddress"],
             }
             for x in data
         ]
