@@ -57,8 +57,6 @@ async def get_categories(response: Response):
     }
 
 
-"""
-
 @router.get("/products/{id}", response_class=JSONResponse)
 async def get_product_by_id(response: Response, id: int):
     router.db_connection.row_factory = sqlite3.Row
@@ -221,4 +219,3 @@ async def delete_category_by_id(response: Response, id: int):
     )
     router.db_connection.commit()
     return {"deleted": cursor.rowcount}
-"""
