@@ -43,7 +43,7 @@ async def get_categories(response: Response):
     response.status_code = status.HTTP_200_OK
     router.db_connection.row_factory = sqlite3.Row
     data = router.db_connection.execute(
-        "SELECT CustomerID, CompanyName, Address, PostalCode, City, Country FROM Customers"
+        "SELECT CustomerID, CompanyName, Address, PostalCode, City, Country FROM Customers ORDER BY LOWER(CustomerID)"
     ).fetchall()
     return {
         "customers": [
@@ -56,6 +56,8 @@ async def get_categories(response: Response):
         ]
     }
 
+
+"""
 
 @router.get("/products/{id}", response_class=JSONResponse)
 async def get_product_by_id(response: Response, id: int):
@@ -203,7 +205,7 @@ async def update_category_by_id(response: Response, id: int, category: Category)
         "SELECT CategoryID, CategoryName FROM Categories WHERE CategoryID = :category_id",
         {"category_id": id},
     ).fetchone()
-    return {"id": id, "name": category.name}
+    return {"id": data["CategoryID"], "name": data["CategoryName"]}
 
 
 @router.delete("/categories/{id}")
@@ -219,3 +221,4 @@ async def delete_category_by_id(response: Response, id: int):
     )
     router.db_connection.commit()
     return {"deleted": cursor.rowcount}
+"""
