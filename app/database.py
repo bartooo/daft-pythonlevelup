@@ -43,7 +43,12 @@ async def get_categories(response: Response):
     response.status_code = status.HTTP_200_OK
     router.db_connection.row_factory = sqlite3.Row
     data = router.db_connection.execute(
-        "SELECT CustomerID, CompanyName, Address|| ' ' || PostalCode || ' ' || City || ' ' || Country AS FullAddress FROM Customers ORDER BY LOWER(CustomerID)"
+        """SELECT CustomerID, 
+        CompanyName, 
+        Address|| ' ' || PostalCode || ' ' || City || ' ' || Country AS FullAddress 
+        FROM Customers 
+        ORDER BY LOWER(CustomerID)
+        """
     ).fetchall()
     return {
         "customers": [
@@ -116,7 +121,11 @@ async def products_extended(response: Response):
     response.status_code = status.HTTP_200_OK
     router.db_connection.row_factory = sqlite3.Row
     data = router.db_connection.execute(
-        "SELECT ProductID, ProductName, CategoryName, CompanyName FROM Products JOIN Categories ON Products.CategoryID = Categories.CategoryID JOIN Suppliers ON Products.SupplierID = Suppliers.SupplierID"
+        """SELECT ProductID, ProductName, CategoryName, CompanyName 
+        FROM Products 
+        JOIN Categories ON Products.CategoryID = Categories.CategoryID 
+        JOIN Suppliers ON Products.SupplierID = Suppliers.SupplierID
+        """
     )
     return {
         "products_extended": [
@@ -149,7 +158,15 @@ async def get_orders_by_product_id(response: Response, id: int):
             detail="Record with given id not found",
         )
     data = router.db_connection.execute(
-        "SELECT Products.ProductID, Orders.OrderID, Customers.CompanyName, 'Order Details'.Quantity, ROUND(('Order Details'.UnitPrice * 'Order Details'.Quantity) - ('Order Details'.Discount * ('Order Details'.UnitPrice * 'Order Details'.Quantity)), 2) AS TotalPrice FROM Products JOIN 'Order Details' ON Products.ProductID = 'Order Details'.ProductID JOIN Orders ON 'Order Details'.OrderID = Orders.OrderID JOIN Customers ON Orders.CustomerID = Customers.CustomerID WHERE Products.ProductID = :product_id",
+        """SELECT Products.ProductID, 
+        Orders.OrderID, 
+        Customers.CompanyName, 
+        'Order Details'.Quantity, 
+        ROUND(('Order Details'.UnitPrice * 'Order Details'.Quantity) - ('Order Details'.Discount * ('Order Details'.UnitPrice * 'Order Details'.Quantity)), 2) AS TotalPrice 
+        FROM Products JOIN 'Order Details' ON Products.ProductID = 'Order Details'.ProductID 
+        JOIN Orders ON 'Order Details'.OrderID = Orders.OrderID JOIN Customers ON Orders.CustomerID = Customers.CustomerID
+        WHERE Products.ProductID = :product_id
+        """,
         {"product_id": id},
     ).fetchall()
     return {
