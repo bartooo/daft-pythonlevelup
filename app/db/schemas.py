@@ -8,3 +8,11 @@ class Shipper(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class Supplier(BaseModel):
+    SupplierID: PositiveInt
+    CompanyName: constr(max_length=40)
+
+    class Config:
+        orm_mode = True

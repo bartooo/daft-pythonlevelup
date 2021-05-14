@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import PositiveInt
 from sqlalchemy.orm import Session
 
@@ -21,3 +21,9 @@ async def get_shipper(shipper_id: PositiveInt, db: Session = Depends(get_db)):
 @router.get("/shippers", response_model=List[schemas.Shipper])
 async def get_shippers(db: Session = Depends(get_db)):
     return crud.get_shippers(db)
+
+
+@router.get("/suppliers", response_model=List[schemas.Supplier])
+async def get_suppliers(response: Response, db: Session = Depends(get_db)):
+    response.status_code = status.HTTP_200_OK
+    return crud.get_suppliers(db)
