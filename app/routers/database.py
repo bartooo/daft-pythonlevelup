@@ -15,7 +15,7 @@ class Category(BaseModel):
 
 @router.on_event("startup")
 async def startup():
-    router.db_connection = sqlite3.connect("northwind.db", check_same_thread=False)
+    router.db_connection = sqlite3.connect("./db/northwind.db", check_same_thread=False)
     router.db_connection.text_factory = lambda b: b.decode(
         errors="ignore"
     )  # northwind specific

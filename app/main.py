@@ -12,7 +12,7 @@ import hashlib
 import secrets
 from typing import Optional
 from datetime import date, datetime, timedelta
-import database
+from routers import database
 
 app = FastAPI()
 app.counter = 0
