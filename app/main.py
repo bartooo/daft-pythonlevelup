@@ -12,7 +12,7 @@ import hashlib
 import secrets
 from typing import Optional
 from datetime import date, datetime, timedelta
-from routers import database, postgresdb
+from routers import database, views
 
 app = FastAPI()
 app.counter = 0
@@ -25,7 +25,7 @@ templates = Jinja2Templates(directory="templates")
 security = HTTPBasic()
 
 app.include_router(database.router)
-app.include_router(postgresdb.router)
+app.include_router(views.router)
 
 
 class HelloResp(BaseModel):
