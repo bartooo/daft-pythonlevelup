@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, load_only
 
 from db import models
 
@@ -14,4 +14,16 @@ def get_shipper(db: Session, shipper_id: int):
 
 
 def get_suppliers(db: Session):
-    return db.query(models.Supplier).order_by(models.Supplier.SupplierID.asc()).all()
+    return (
+        db.query(models.Supplier.SupplierID, models.Supplier.CompanyName)
+        .order_by(models.Supplier.SupplierID.asc())
+        .all()
+    )
+
+
+def get_supplier(db: Session, supplier_id: int):
+    return (
+        db.query(models.Supplier)
+        .filter(models.Supplier.SupplierID == supplier_id)
+        .first()
+    )
