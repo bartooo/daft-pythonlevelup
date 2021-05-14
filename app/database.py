@@ -121,7 +121,8 @@ async def products_extended(response: Response):
     response.status_code = status.HTTP_200_OK
     router.db_connection.row_factory = sqlite3.Row
     data = router.db_connection.execute(
-        """SELECT ProductID, ProductName, CategoryName, CompanyName 
+        """
+        SELECT ProductID, ProductName, CategoryName, CompanyName 
         FROM Products 
         JOIN Categories ON Products.CategoryID = Categories.CategoryID 
         JOIN Suppliers ON Products.SupplierID = Suppliers.SupplierID
@@ -158,7 +159,8 @@ async def get_orders_by_product_id(response: Response, id: int):
             detail="Record with given id not found",
         )
     data = router.db_connection.execute(
-        """SELECT Products.ProductID, 
+        """
+        SELECT Products.ProductID, 
         Orders.OrderID, 
         Customers.CompanyName, 
         'Order Details'.Quantity, 
