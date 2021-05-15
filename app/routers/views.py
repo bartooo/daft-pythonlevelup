@@ -54,3 +54,34 @@ async def get_products_by_supplier_id(supplier_id: int, db: Session = Depends(ge
         }
         for row in db_products
     ]
+
+
+@router.post("/suppliers")
+async def insert_supplier(
+    response: Response, new_supplier: schemas.Supplier, db: Session = Depends(get_db)
+):
+    in_supplier = models.Supplier()
+    in_supplier.CompanyName = new_supplier.CompanyName
+    in_supplier.ContactName = new_supplier.ContactName
+    in_supplier.ContactTitle = new_supplier.ContactTitle
+    in_supplier.Address = new_supplier.Address
+    in_supplier.City = new_supplier.City
+    in_supplier.PostalCode = new_supplier.PostalCode
+    in_supplier.Country = new_supplier.Country
+    in_supplier.Phone = new_supplier.Phone
+    db.add(in_supplier)
+    db.commit()
+    response.status_code = status.HTTP_201_CREATED
+    return {
+        "SupplierID": in_supplier.SupplierID,
+        "CompanyName": in_supplier.CompanyName,
+        "ContactName": in_supplier.ContactName,
+        "ContactTitle": in_supplier.ContactTitle,
+        "Address": in_supplier.Address,
+        "City": in_supplier.City,
+        "PostalCode": in_supplier.PostalCode,
+        "Country": in_supplier.Country,
+        "Phone": in_supplier.Phone,
+        "Fax": None,
+        "HomePage": None,
+    }
