@@ -70,9 +70,11 @@ async def insert_supplier(
     in_supplier.PostalCode = new_supplier.PostalCode
     in_supplier.Country = new_supplier.Country
     in_supplier.Phone = new_supplier.Phone
+    response.status_code = status.HTTP_201_CREATED
+    """
     crud.insert_supplier(db, in_supplier)
     # db_supplier = crud.get_supplier(db, id)
-    response.status_code = status.HTTP_201_CREATED
+    
     # return db_supplier
 
     return {
@@ -87,3 +89,4 @@ async def insert_supplier(
         "Fax": None,
         "HomePage": None,
     }
+    """
