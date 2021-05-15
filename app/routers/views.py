@@ -59,7 +59,7 @@ async def get_products_by_supplier_id(supplier_id: int, db: Session = Depends(ge
 
 @router.post("/suppliers", response_model=schemas.Supplier)
 async def insert_supplier(
-    response: Response, new_supplier: schemas.Supplier, db: Session = Depends(get_db)
+    new_supplier: schemas.Supplier, response: Response, db: Session = Depends(get_db)
 ):
     in_supplier = models.Supplier()
     in_supplier.CompanyName = new_supplier.CompanyName
@@ -70,13 +70,12 @@ async def insert_supplier(
     in_supplier.PostalCode = new_supplier.PostalCode
     in_supplier.Country = new_supplier.Country
     in_supplier.Phone = new_supplier.Phone
-    id = crud.insert_supplier(db, in_supplier)
-    db_supplier = crud.get_supplier(db, id)
+    crud.insert_supplier(db, in_supplier)
+    # db_supplier = crud.get_supplier(db, id)
     response.status_code = status.HTTP_201_CREATED
-    return db_supplier
-    """
+    # return db_supplier
+
     return {
-        "SupplierID": id,
         "CompanyName": in_supplier.CompanyName,
         "ContactName": in_supplier.ContactName,
         "ContactTitle": in_supplier.ContactTitle,
@@ -88,4 +87,3 @@ async def insert_supplier(
         "Fax": None,
         "HomePage": None,
     }
-    """
