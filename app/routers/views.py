@@ -71,9 +71,9 @@ async def insert_supplier(
     in_supplier.Country = new_supplier.Country
     in_supplier.Phone = new_supplier.Phone
     id = crud.insert_supplier(db, in_supplier)
-    in_supplier.SupplierID = id
+    db_supplier = crud.get_supplier(db, id)
     response.status_code = status.HTTP_201_CREATED
-    return in_supplier
+    return db_supplier
     """
     return {
         "SupplierID": id,
