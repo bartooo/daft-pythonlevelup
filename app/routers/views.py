@@ -75,17 +75,3 @@ async def insert_supplier(
     db_supplier = crud.get_supplier(db, id)
 
     return db_supplier
-    """
-    return {
-        "CompanyName": in_supplier.CompanyName,
-        "ContactName": in_supplier.ContactName,
-        "ContactTitle": in_supplier.ContactTitle,
-        "Address": in_supplier.Address,
-        "City": in_supplier.City,
-        "PostalCode": in_supplier.PostalCode,
-        "Country": in_supplier.Country,
-        "Phone": in_supplier.Phone,
-        "Fax": None,
-        "HomePage": None,
-    }
-    """

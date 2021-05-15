@@ -1,5 +1,5 @@
-from sqlalchemy.orm import Session, load_only
-
+from sqlalchemy.orm import Session
+from sqlalchemy.sql.expression import func
 from db import models
 
 
@@ -55,8 +55,8 @@ def get_category_by_id(db: Session, category_id: int):
 
 
 def insert_supplier(db: Session, new_supplier: models.Supplier):
+    if not new_supplier.SupplierID:
+        new_supplier.SupplierID = db.query(func.max(models.Supplier.SupplierID))
     db.add(new_supplier)
-    db.flush()
-    new_id = new_supplier.SupplierID
     db.commit()
-    return new_id
+    return new_supplier.SupplierID
