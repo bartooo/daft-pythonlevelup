@@ -56,7 +56,7 @@ def get_category_by_id(db: Session, category_id: int):
 
 def insert_supplier(db: Session, new_supplier: models.Supplier):
     if not new_supplier.SupplierID:
-        new_supplier.SupplierID = db.query(func.max(models.Supplier.SupplierID))
+        new_supplier.SupplierID = db.query(func.max(models.Supplier.SupplierID)) + 1
     db.add(new_supplier)
     db.commit()
     return new_supplier.SupplierID
