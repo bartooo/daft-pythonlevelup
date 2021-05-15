@@ -35,3 +35,22 @@ class Supplier(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class Product(BaseModel):
+    ProductID: PositiveInt
+    ProductName: constr(max_length=40)
+    CategoryID: Optional[PositiveInt]
+    SupplierID: Optional[PositiveInt]
+    Discontinued: int
+
+    class Config:
+        orm_mode = True
+
+
+class Category(BaseModel):
+    CategoryID: PositiveInt
+    CategoryName: constr(max_length=15)
+
+    class Config:
+        orm_mode = True
