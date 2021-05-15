@@ -3,6 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import PositiveInt
 from sqlalchemy.orm import Session
+from starlette.responses import JSONResponse
 
 from db import schemas, models, crud
 from db.db import get_db
@@ -56,7 +57,7 @@ async def get_products_by_supplier_id(supplier_id: int, db: Session = Depends(ge
     ]
 
 
-@router.post("/suppliers")
+@router.post("/suppliers", response_model=JSONResponse)
 async def insert_supplier(
     response: Response, new_supplier: schemas.Supplier, db: Session = Depends(get_db)
 ):
@@ -69,11 +70,10 @@ async def insert_supplier(
     in_supplier.PostalCode = new_supplier.PostalCode
     in_supplier.Country = new_supplier.Country
     in_supplier.Phone = new_supplier.Phone
-    db.add(in_supplier)
-    db.commit()
+    id = crud.insert_supplier(db, in_supplier)
     response.status_code = status.HTTP_201_CREATED
     return {
-        "SupplierID": in_supplier.SupplierID,
+        "SupplierID": id,
         "CompanyName": in_supplier.CompanyName,
         "ContactName": in_supplier.ContactName,
         "ContactTitle": in_supplier.ContactTitle,

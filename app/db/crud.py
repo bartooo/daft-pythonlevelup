@@ -52,3 +52,11 @@ def get_category_by_id(db: Session, category_id: int):
         .filter(models.Category.CategoryID == category_id)
         .first()
     )
+
+
+def insert_supplier(db: Session, new_supplier: models.Supplier):
+    db.add(new_supplier)
+    db.flush()
+    new_id = new_supplier.SupplierID
+    db.commit()
+    return new_id
