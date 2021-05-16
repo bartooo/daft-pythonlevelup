@@ -21,7 +21,7 @@ class SupplierTmp(BaseModel):
 
 class Supplier(BaseModel):
     SupplierID: Optional[PositiveInt]
-    CompanyName: constr(max_length=40)
+    CompanyName: Optional[constr(max_length=40)]
     ContactName: Optional[constr(max_length=30)]
     ContactTitle: Optional[constr(max_length=30)]
     Address: Optional[constr(max_length=60)]
