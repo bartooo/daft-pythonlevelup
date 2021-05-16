@@ -69,3 +69,4 @@ def update_supplier(db: Session, id: int, to_update: schemas.Supplier):
     db.query(models.Supplier).filter(models.Supplier.SupplierID == id).update(
         dict(update_dict)
     )
+    db.commit()
