@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import func
-from db import models
+from db import models, schemas
 
 
 def get_shippers(db: Session):
@@ -62,3 +62,7 @@ def insert_supplier(db: Session, new_supplier: models.Supplier):
     db.add(new_supplier)
     db.commit()
     return new_supplier.SupplierID
+
+
+def update_supplier(db: Session, id: int, to_update: schemas.Supplier):
+    db.query(models.Supplier).filter(models.Supplier.SupplierID == id).update(to_update)
