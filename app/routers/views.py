@@ -98,6 +98,6 @@ async def delete_supplier(
 ):
     db_supplier = crud.get_supplier(db, id)
     if db_supplier is None:
-        raise HTTPException(status_code=401, detail="Supplier not found")
+        raise HTTPException(status_code=404, detail="Supplier not found")
     crud.delete_supplier(db, id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
