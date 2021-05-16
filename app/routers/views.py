@@ -78,7 +78,7 @@ async def insert_supplier(
 
 
 @router.put("/suppliers/{id}", response_model=schemas.Supplier)
-def update_supplier(
+async def update_supplier(
     id: int,
     to_update: schemas.Supplier,
     db: Session = Depends(get_db),
@@ -91,14 +91,13 @@ def update_supplier(
     return db_supplier
 
 
-@router.delete("/suppliers/{id}", response_model=schemas.Supplier)
-def delete_supplier(
+@router.delete("/suppliers/{id}")
+async def delete_supplier(
     id: int,
-    response: Response,
     db: Session = Depends(get_db),
 ):
     db_supplier = crud.get_supplier(db, id)
     if db_supplier is None:
         raise HTTPException(status_code=401, detail="Supplier not found")
     crud.delete_supplier(db, id)
-    response.status_code = 204
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
