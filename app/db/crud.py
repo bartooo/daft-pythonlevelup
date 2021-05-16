@@ -71,3 +71,8 @@ def update_supplier(db: Session, id: int, to_update: schemas.Supplier):
             update_dict
         )
         db.commit()
+
+
+def delete_supplier(db: Session, id: int):
+    db.query(models.Supplier).filter(models.Supplier.SupplierID == id).delete()
+    db.commit()
