@@ -65,4 +65,7 @@ def insert_supplier(db: Session, new_supplier: models.Supplier):
 
 
 def update_supplier(db: Session, id: int, to_update: schemas.Supplier):
-    db.query(models.Supplier).filter(models.Supplier.SupplierID == id).update(to_update)
+    update_dict = {k: v for k, v in dict(to_update).items() if v is not None}
+    db.query(models.Supplier).filter(models.Supplier.SupplierID == id).update(
+        dict(update_dict)
+    )

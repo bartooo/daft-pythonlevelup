@@ -81,7 +81,6 @@ async def insert_supplier(
 def update_supplier(
     id: int,
     to_update: schemas.Supplier,
-    response: Response,
     db: Session = Depends(get_db),
 ):
     db_supplier = crud.get_supplier(db, id)
